@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Headphones,
   Star,
+  Database,
 } from "lucide-react";
 
 const nav = [
@@ -20,6 +21,7 @@ const nav = [
   { href: "/dashboard/contact", label: "Contact Us", icon: MessageSquare },
   { href: "/dashboard/support", label: "Support", icon: Headphones },
   { href: "/dashboard/feedback", label: "Feedback", icon: Star },
+  { href: "/dashboard/databases", label: "Databases", icon: Database },
 ];
 
 export default function DashboardNav() {
