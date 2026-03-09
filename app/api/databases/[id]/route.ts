@@ -4,7 +4,7 @@ import { maskConnectionUrl } from "@/lib/pg-dynamic";
 import { isR2Configured } from "@/lib/r2-dynamic";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
@@ -13,7 +13,9 @@ export async function GET(
     if (!db) {
       return NextResponse.json({ error: "Database not found" }, { status: 404 });
     }
-    return NextResponse.json({
+    const url = new URL(request.url);
+    const forEdit = url.searchParams.get("forEdit") === "1" || url.searchParams.get("forEdit") === "true";
+    const base = {
       id: db.id,
       name: db.name,
       connectionUrlMasked: maskConnectionUrl(db.connectionUrl),
@@ -25,7 +27,19 @@ export async function GET(
         r2PublicUrl: db.r2PublicUrl,
       }),
       createdAt: db.createdAt.toISOString(),
-    });
+    };
+    if (forEdit) {
+      return NextResponse.json({
+        ...base,
+        connectionUrl: db.connectionUrl ?? "",
+        r2AccountId: db.r2AccountId ?? "",
+        r2AccessKeyId: db.r2AccessKeyId ?? "",
+        r2SecretAccessKey: db.r2SecretAccessKey ?? "",
+        r2Bucket: db.r2Bucket ?? "",
+        r2PublicUrl: db.r2PublicUrl ?? "",
+      });
+    }
+    return NextResponse.json(base);
   } catch (e) {
     console.error("GET /api/databases/[id]", e);
     return NextResponse.json({ error: "Failed to load database" }, { status: 500 });

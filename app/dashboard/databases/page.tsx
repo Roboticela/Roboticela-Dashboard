@@ -71,6 +71,27 @@ export default function DatabasesPage() {
     setModalOpen(true);
   };
 
+  useEffect(() => {
+    if (!modalOpen || !editTarget) return;
+    let cancelled = false;
+    fetch(`/api/databases/${editTarget.id}?forEdit=1`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled || !data.id) return;
+        setForm({
+          name: data.name ?? "",
+          connectionUrl: data.connectionUrl ?? "",
+          r2AccountId: data.r2AccountId ?? "",
+          r2AccessKeyId: data.r2AccessKeyId ?? "",
+          r2SecretAccessKey: data.r2SecretAccessKey ?? "",
+          r2Bucket: data.r2Bucket ?? "",
+          r2PublicUrl: data.r2PublicUrl ?? "",
+        });
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [modalOpen, editTarget?.id]);
+
   const addDatabase = async () => {
     if (!form.name.trim() || !form.connectionUrl.trim()) {
       setError("Name and connection URL are required.");
@@ -299,7 +320,7 @@ export default function DatabasesPage() {
                   <div>
                     <label className="block text-xs font-medium text-foreground/70 mb-1">Secret Access Key</label>
                     <input
-                      type="password"
+                      type="text"
                       value={form.r2SecretAccessKey}
                       onChange={(e) => setForm((f) => ({ ...f, r2SecretAccessKey: e.target.value }))}
                       className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground text-sm placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30"
